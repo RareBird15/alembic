@@ -98,7 +98,8 @@
     flex-wrap: wrap;
     gap: .35rem .5rem;
   }
-  ul#elements li { margin: 0; }
+  ul#elements li { margin: 0; display: flex; flex-direction: column; align-items: flex-start; }
+  .flavor { color: var(--muted); font-size: .85rem; margin-top: .15rem; }
   .goal-list { list-style: none; padding: 0; }
   .goal-list li { padding: .15rem 0; }
   .goal-list .reached { color: var(--good); }
@@ -127,6 +128,11 @@
   <section aria-labelledby="how-heading">
     <h2 id="how-heading">How to play</h2>
     <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 82 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
+  </section>
+
+  <section aria-labelledby="options-heading">
+    <h2 id="options-heading">Options</h2>
+    <button id="flavor-btn">Flavor text: on</button>
   </section>
 
   <section aria-labelledby="cauldron-heading">
@@ -263,6 +269,92 @@
     "Lightbulb","Machine","Steel","Knowledge","Cyborg"
   ];
 
+  // Flavor text: one line per element. Goals get a longer, two-clause line.
+  var FLAVOR = {
+    "Fire": "warm, hungry, bright.",
+    "Water": "the shape that always moves.",
+    "Earth": "the ground under everything.",
+    "Air": "the wind you can't see.",
+    "Steam": "water, learning to fly.",
+    "Lava": "the earth, running hot.",
+    "Energy": "motion, waiting to happen.",
+    "Mud": "the earth, remembering rain.",
+    "Mist": "water, thinned to a whisper.",
+    "Dust": "the earth, worn to powder.",
+    "Cloud": "steam, gathered into weather.",
+    "Rain": "the cloud, letting go.",
+    "Sky": "the space the clouds drift through.",
+    "Sun": "the fire that lights the sky.",
+    "Rainbow": "light, split open and laid out. A promise the sky makes after the rain.",
+    "Storm": "the sky, holding its breath.",
+    "Flood": "water, forgetting its banks.",
+    "Stone": "fire, cooled into patience.",
+    "Volcano": "the earth, angry on purpose.",
+    "Sand": "stone, ground down to time.",
+    "Metal": "stone, with a temper.",
+    "Rust": "metal, slowly returning to earth.",
+    "Steel": "metal, hardened into purpose. The fire is in it still, but it no longer shows.",
+    "Glass": "sand, melted into light.",
+    "Boulder": "stone, gathered.",
+    "Mountain": "the earth, standing up.",
+    "Waterfall": "water, learning to fall.",
+    "Lake": "water, resting.",
+    "Ocean": "all the water, in one place. Deep enough to hold its own weather.",
+    "Beach": "where the land meets the sea.",
+    "Plant": "the earth, waking up.",
+    "Tree": "a plant that decided to stay.",
+    "Forest": "many trees, keeping each other company. A place that breathes all at once.",
+    "Flower": "a plant, showing off.",
+    "Garden": "flowers, arranged on purpose.",
+    "Ash": "what fire leaves behind.",
+    "Swamp": "mud, come alive.",
+    "Clay": "mud, waiting to be shaped.",
+    "Life": "the first breath in the mud. Then a second breath, and it did not stop.",
+    "Animal": "life, given a body.",
+    "Fish": "life that chose the water.",
+    "Bird": "life that chose the sky.",
+    "Phoenix": "life that will not stay dead. Fire takes it; fire gives it back.",
+    "Human": "life, shaped by careful hands. Hands that were themselves shaped.",
+    "Pet": "an animal that chose you back.",
+    "Egg": "tomorrow, wearing a shell.",
+    "Bear": "the forest's heavy answer.",
+    "Monkey": "an animal that climbs with curiosity.",
+    "Whale": "the ocean's deep song. A voice that carries through all that water.",
+    "Crab": "the beach, walking sideways.",
+    "Duck": "a bird that walks on water.",
+    "Brick": "mud, baked into a promise.",
+    "Wall": "bricks, agreeing to stand.",
+    "House": "walls that became a room. A room that learned to keep someone warm.",
+    "Window": "a wall that lets the light in.",
+    "Home": "a house that someone loves.",
+    "Tool": "the hand's idea, made hard.",
+    "Wood": "a tree, ready to work.",
+    "Campfire": "wood, giving its warmth back.",
+    "Farmer": "a person who listens to seeds.",
+    "Field": "the earth, ready to be planted.",
+    "Wheat": "a field, gathered into gold.",
+    "Bread": "warmth you can hold. Its smell fills the whole house.",
+    "Cabin": "a house that remembers the trees.",
+    "Castle": "a house that became a story. Stone that learned to outlast everyone who built it.",
+    "Hammer": "force, given a handle.",
+    "Electricity": "energy, running through wire.",
+    "Lightbulb": "light, kept in a glass. A small sun that answers when you ask.",
+    "Machine": "steel, given a job. It works without tiring, and never complains.",
+    "Engine": "a machine that learned to pull.",
+    "Wheel": "the circle that never stops.",
+    "Car": "wheels that carry you. The road is long; the wheels don't seem to mind.",
+    "Boat": "wood that learned to float. It carries you where walking stops.",
+    "Airplane": "a bird made of patience and metal. No wings to flap, only a will to stay up.",
+    "Computer": "a machine that thinks in code. It forgets nothing and forgives nothing.",
+    "Robot": "a mind, given a body. It moves on its own now, and looks back at its maker.",
+    "Paper": "a tree, made thin enough to write on.",
+    "Book": "thoughts, bound together.",
+    "Omelette": "an egg that became a meal.",
+    "Knowledge": "the things we pass down. What survives us, carried in other hands.",
+    "Holiday": "a day that forgot its to-do list.",
+    "Cyborg": "a person and a machine, learning each other. Neither sure where one ends and the other begins."
+  };
+
   function key(a, b) {
     return [a, b].sort().join("|");
   }
@@ -285,11 +377,12 @@
     discoveryOrder.push(el);
   });
 
+  var flavorOn = true;
   var SAVE_KEY = "alembic-save-v1";
 
   function save() {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn }));
     } catch (e) { /* storage unavailable (private browsing, etc.) */ }
   }
 
@@ -310,6 +403,7 @@
         }
       });
       discoveryOrder = BASE.concat(extras);
+      if (data.flavorOn === false) { flavorOn = false; }
     } catch (e) { /* corrupt save: ignore */ }
   }
   load();
@@ -393,6 +487,12 @@
       btn.setAttribute("aria-label", "Add " + name + " to cauldron");
       btn.addEventListener("click", function () { addToCauldron(name); });
       li.appendChild(btn);
+      if (flavorOn && FLAVOR[name]) {
+        var f = document.createElement("span");
+        f.className = "flavor";
+        f.textContent = FLAVOR[name];
+        li.appendChild(f);
+      }
       list.appendChild(li);
     });
     return shown;
@@ -435,12 +535,15 @@
         renderGoals();
         var base = a + " and " + b + " make " + result + ". You have found " +
           discoveryOrder.length + " of " + TOTAL + " elements.";
+        var flavorText = (flavorOn && FLAVOR[result]) ? FLAVOR[result] : "";
+        var flavorSep = flavorText ?
+          ". " + flavorText.charAt(0).toUpperCase() + flavorText.slice(1) + " " : "! ";
         if (wasGoal) {
           var reached = GOALS.filter(function (g) { return discovered[g]; }).length;
-          announce("Goal achieved: " + result + "! " + base + " You've reached " +
+          announce("Goal achieved: " + result + flavorSep + base + " You've reached " +
             reached + " of " + GOALS.length + " goals.");
         } else {
-          announce("New discovery: " + result + "! " + base);
+          announce("New discovery: " + result + flavorSep + base);
         }
       } else {
         announce(a + " and " + b + " make " + result + ", but you've already discovered it.");
@@ -486,6 +589,13 @@
   $("combine-btn").addEventListener("click", combine);
   $("clear-btn").addEventListener("click", clearCauldron);
   $("hint-btn").addEventListener("click", hint);
+  $("flavor-btn").addEventListener("click", function () {
+    flavorOn = !flavorOn;
+    $("flavor-btn").textContent = "Flavor text: " + (flavorOn ? "on" : "off");
+    renderCatalog(currentFilter());
+    save();
+    announce("Flavor text turned " + (flavorOn ? "on" : "off") + ".");
+  });
 
   var resetArmed = false;
   $("reset-btn").addEventListener("click", function () {

@@ -25,6 +25,8 @@ You can also open `index.html` directly in any browser.
   milestone goals like Life, Human, House, Computer, and Phoenix.
 - **Hints that don't spoil it.** "Get a hint" reveals the *pair* to try, never
   the result — so the discovery still feels earned.
+- **Flavor text.** Every element has a short line of flavor, read aloud the
+  moment you discover it. Toggle it on or off in Options.
 - **Automatic save.** Progress persists in your browser and restores on reload.
 - **Reset with a safety check.** Wiping progress needs two confirming clicks.
 
@@ -39,7 +41,7 @@ You can also open `index.html` directly in any browser.
 ## Status
 
 Alpha. The core game is complete — 82 elements, 20 milestone goals, automatic
-saving. Flavor text, themed worlds, and optional sound are planned.
+saving, and flavor text. Themed worlds and optional sound are planned.
 
 ## License
 
