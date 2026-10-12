@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+*.local
+
+# Editor
+.vscode/*
+
+# Local history extension
+.lh/

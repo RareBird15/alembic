@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alembic — a text alchemy game</title>
+<style>
+  :root {
+    --fg: #1a1a1a;
+    --muted: #555;
+    --accent: #7a3b9e;
+    --border: #ccc;
+    --card: #fafafa;
+    --focus: #2b6cb0;
+    --good: #2e7d32;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg: #e8e8e8;
+      --muted: #aaa;
+      --accent: #b57fd0;
+      --border: #444;
+      --card: #1e1e1e;
+      --focus: #6cb0ff;
+      --good: #81c784;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--fg);
+    background: transparent;
+    line-height: 1.6;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 4rem;
+    font-size: 1.05rem;
+  }
+  h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.3rem; margin: 1.75rem 0 .5rem; }
+  .tagline { color: var(--muted); margin-top: 0; }
+  a.skip {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--accent); color: #fff; padding: .5rem 1rem;
+  }
+  a.skip:focus { left: 0; }
+  button {
+    font: inherit;
+    font-size: 1rem;
+    padding: .55rem .9rem;
+    margin: .15rem .3rem .15rem 0;
+    border: 2px solid var(--border);
+    border-radius: .5rem;
+    background: var(--card);
+    color: var(--fg);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .cauldron-box {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    margin: .5rem 0 .75rem;
+  }
+  .slot {
+    border: 2px dashed var(--border);
+    border-radius: .5rem;
+    padding: .6rem 1.1rem;
+    min-width: 9rem;
+    text-align: center;
+    background: var(--card);
+  }
+  .slot.filled { border-style: solid; border-color: var(--accent); font-weight: 600; }
+  input[type="text"] {
+    font: inherit;
+    padding: .5rem .7rem;
+    border: 2px solid var(--border);
+    border-radius: .5rem;
+    background: var(--card);
+    color: var(--fg);
+    width: 100%;
+    max-width: 22rem;
+    margin-bottom: .5rem;
+  }
+  ul#elements {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .5rem;
+  }
+  ul#elements li { margin: 0; }
+  .goal-list { list-style: none; padding: 0; }
+  .goal-list li { padding: .15rem 0; }
+  .goal-list .reached { color: var(--good); }
+  .goal-list .remaining { color: var(--muted); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .count { color: var(--muted); font-weight: normal; font-size: .95rem; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header>
+  <h1>Alembic</h1>
+  <p class="tagline">A text alchemy game built for screen readers</p>
+</header>
+
+<main id="main">
+
+  <section aria-labelledby="how-heading">
+    <h2 id="how-heading">How to play</h2>
+    <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 82 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
+  </section>
+
+  <section aria-labelledby="cauldron-heading">
+    <h2 id="cauldron-heading">Your cauldron</h2>
+    <div class="cauldron-box" aria-hidden="true">
+      <div id="slot1" class="slot">Empty</div>
+      <div id="slot2" class="slot">Empty</div>
+    </div>
+    <div id="cauldron-live" role="status" aria-live="polite" class="sr-only"></div>
+    <button id="combine-btn" class="primary" disabled>Combine</button>
+    <button id="clear-btn">Clear cauldron</button>
+  </section>
+
+  <section aria-labelledby="goals-heading">
+    <h2 id="goals-heading">Goals <span class="count" id="goal-count"></span></h2>
+    <div id="goal-live" role="status" aria-live="polite" class="sr-only"></div>
+    <ul id="goals" class="goal-list" role="list"></ul>
+  </section>
+
+  <section aria-labelledby="elements-heading">
+    <h2 id="elements-heading">Discovered elements <span class="count" id="count"></span></h2>
+    <label for="search" class="sr-only">Search discovered elements</label>
+    <input id="search" type="text" placeholder="Search elements" autocomplete="off">
+    <div id="search-live" role="status" aria-live="polite" class="sr-only"></div>
+    <ul id="elements" role="list"></ul>
+  </section>
+
+  <section aria-labelledby="hint-heading">
+    <h2 id="hint-heading">Stuck?</h2>
+    <button id="hint-btn">Get a hint</button>
+  </section>
+
+  <section aria-labelledby="reset-heading">
+    <h2 id="reset-heading">Reset</h2>
+    <button id="reset-btn">Reset all progress</button>
+  </section>
+
+</main>
+
+<div id="announce" role="status" aria-live="polite" class="sr-only"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var BASE = ["Fire", "Water", "Earth", "Air"];
+
+  // Each recipe: [element A, element B, result]. Order is handled at runtime.
+  var RECIPE_LIST = [
+    ["Fire","Water","Steam"],
+    ["Fire","Earth","Lava"],
+    ["Fire","Air","Energy"],
+    ["Water","Earth","Mud"],
+    ["Water","Air","Mist"],
+    ["Earth","Air","Dust"],
+    ["Steam","Air","Cloud"],
+    ["Cloud","Water","Rain"],
+    ["Cloud","Air","Sky"],
+    ["Sky","Fire","Sun"],
+    ["Sun","Rain","Rainbow"],
+    ["Cloud","Energy","Storm"],
+    ["Storm","Water","Flood"],
+    ["Lava","Water","Stone"],
+    ["Lava","Earth","Volcano"],
+    ["Stone","Air","Sand"],
+    ["Stone","Fire","Metal"],
+    ["Metal","Water","Rust"],
+    ["Metal","Fire","Steel"],
+    ["Sand","Fire","Glass"],
+    ["Stone","Stone","Boulder"],
+    ["Boulder","Boulder","Mountain"],
+    ["Mountain","Water","Waterfall"],
+    ["Water","Water","Lake"],
+    ["Lake","Water","Ocean"],
+    ["Sand","Water","Beach"],
+    ["Rain","Earth","Plant"],
+    ["Plant","Earth","Tree"],
+    ["Tree","Tree","Forest"],
+    ["Sun","Plant","Flower"],
+    ["Flower","Flower","Garden"],
+    ["Plant","Fire","Ash"],
+    ["Mud","Plant","Swamp"],
+    ["Mud","Sand","Clay"],
+    ["Swamp","Energy","Life"],
+    ["Life","Earth","Animal"],
+    ["Life","Water","Fish"],
+    ["Life","Air","Bird"],
+    ["Life","Fire","Phoenix"],
+    ["Life","Clay","Human"],
+    ["Animal","Human","Pet"],
+    ["Bird","Bird","Egg"],
+    ["Animal","Forest","Bear"],
+    ["Animal","Tree","Monkey"],
+    ["Ocean","Fish","Whale"],
+    ["Beach","Animal","Crab"],
+    ["Bird","Water","Duck"],
+    ["Mud","Fire","Brick"],
+    ["Brick","Brick","Wall"],
+    ["Wall","Wall","House"],
+    ["Glass","Wall","Window"],
+    ["House","Human","Home"],
+    ["Human","Metal","Tool"],
+    ["Tool","Tree","Wood"],
+    ["Wood","Fire","Campfire"],
+    ["Human","Plant","Farmer"],
+    ["Farmer","Earth","Field"],
+    ["Field","Plant","Wheat"],
+    ["Wheat","Fire","Bread"],
+    ["Wood","House","Cabin"],
+    ["Stone","House","Castle"],
+    ["Tool","Stone","Hammer"],
+    ["Energy","Metal","Electricity"],
+    ["Electricity","Glass","Lightbulb"],
+    ["Steel","Tool","Machine"],
+    ["Machine","Energy","Engine"],
+    ["Tool","Wood","Wheel"],
+    ["Wheel","Metal","Car"],
+    ["Wood","Water","Boat"],
+    ["Bird","Metal","Airplane"],
+    ["Machine","Electricity","Computer"],
+    ["Computer","Metal","Robot"],
+    ["Plant","Water","Paper"],
+    ["Paper","Paper","Book"],
+    ["Egg","Fire","Omelette"],
+    ["Human","Book","Knowledge"],
+    ["Beach","Sun","Holiday"],
+    ["Robot","Human","Cyborg"]
+  ];
+
+  // Milestone elements to chase.
+  var GOALS = [
+    "Life","Human","House","Car","Boat","Airplane","Computer","Robot",
+    "Castle","Phoenix","Whale","Rainbow","Ocean","Forest","Bread",
+    "Lightbulb","Machine","Steel","Knowledge","Cyborg"
+  ];
+
+  function key(a, b) {
+    return [a, b].sort().join("|");
+  }
+
+  var RECIPES = {};
+  var allResults = {};
+  RECIPE_LIST.forEach(function (r) {
+    RECIPES[key(r[0], r[1])] = r[2];
+    allResults[r[2]] = true;
+  });
+  var TOTAL = BASE.length + Object.keys(allResults).length;
+
+  var goalSet = {};
+  GOALS.forEach(function (g) { goalSet[g] = true; });
+
+  var discovered = {};
+  var discoveryOrder = [];
+  BASE.forEach(function (el) {
+    discovered[el] = true;
+    discoveryOrder.push(el);
+  });
+
+  var SAVE_KEY = "alembic-save-v1";
+
+  function save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder }));
+    } catch (e) { /* storage unavailable (private browsing, etc.) */ }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) { return; }
+      var data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.discoveryOrder)) { return; }
+      var known = {};
+      BASE.forEach(function (b) { known[b] = true; });
+      Object.keys(allResults).forEach(function (r) { known[r] = true; });
+      var extras = [];
+      data.discoveryOrder.forEach(function (name) {
+        if (known[name] && !discovered[name]) {
+          discovered[name] = true;
+          if (BASE.indexOf(name) === -1) { extras.push(name); }
+        }
+      });
+      discoveryOrder = BASE.concat(extras);
+    } catch (e) { /* corrupt save: ignore */ }
+  }
+  load();
+
+  var slot1 = null;
+  var slot2 = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  function announce(text) {
+    var el = $("announce");
+    el.textContent = "";
+    window.setTimeout(function () { el.textContent = text; }, 30);
+  }
+  function announceCauldron(text) {
+    var el = $("cauldron-live");
+    el.textContent = "";
+    window.setTimeout(function () { el.textContent = text; }, 30);
+  }
+
+  function cauldronState() {
+    var a = slot1 ? slot1 : "empty";
+    var b = slot2 ? slot2 : "empty";
+    return "Cauldron: " + a + " and " + b + ".";
+  }
+
+  function renderCauldron() {
+    var s1 = $("slot1"), s2 = $("slot2");
+    s1.textContent = slot1 || "Empty";
+    s2.textContent = slot2 || "Empty";
+    s1.classList.toggle("filled", !!slot1);
+    s2.classList.toggle("filled", !!slot2);
+    $("combine-btn").disabled = !(slot1 && slot2);
+  }
+
+  function renderCount() {
+    $("count").textContent = "(" + discoveryOrder.length + " of " + TOTAL + ")";
+  }
+
+  function renderGoals() {
+    var reached = GOALS.filter(function (g) { return discovered[g]; });
+    var remaining = GOALS.filter(function (g) { return !discovered[g]; });
+    $("goal-count").textContent = "(" + reached.length + " of " + GOALS.length + " reached)";
+    var list = $("goals");
+    list.innerHTML = "";
+    function addGroup(label, items, cls) {
+      var heading = document.createElement("li");
+      heading.textContent = label;
+      heading.style.fontWeight = "600";
+      heading.style.marginTop = ".25rem";
+      list.appendChild(heading);
+      if (items.length === 0) {
+        var none = document.createElement("li");
+        none.className = "remaining";
+        none.textContent = "None";
+        list.appendChild(none);
+        return;
+      }
+      items.forEach(function (name) {
+        var li = document.createElement("li");
+        li.className = cls;
+        li.textContent = name;
+        list.appendChild(li);
+      });
+    }
+    addGroup("Reached:", reached, "reached");
+    addGroup("Still to find:", remaining, "remaining");
+  }
+
+  function renderCatalog(filter) {
+    var list = $("elements");
+    list.innerHTML = "";
+    var shown = 0;
+    discoveryOrder.forEach(function (name) {
+      if (filter && name.toLowerCase().indexOf(filter) === -1) { return; }
+      shown++;
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = name;
+      btn.setAttribute("aria-label", "Add " + name + " to cauldron");
+      btn.addEventListener("click", function () { addToCauldron(name); });
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+    return shown;
+  }
+
+  function addToCauldron(name) {
+    if (!slot1) {
+      slot1 = name;
+      renderCauldron();
+      announceCauldron(name + " added to the cauldron. " + cauldronState());
+    } else if (!slot2) {
+      slot2 = name;
+      renderCauldron();
+      announceCauldron(name + " added to the cauldron. " + cauldronState());
+    } else {
+      announce("The cauldron is full. Choose Combine, or Clear first.");
+    }
+  }
+
+  function clearCauldron() {
+    slot1 = null;
+    slot2 = null;
+    renderCauldron();
+    announceCauldron("Cauldron cleared.");
+  }
+
+  function combine() {
+    if (!slot1 || !slot2) { return; }
+    var a = slot1, b = slot2;
+    var result = RECIPES[key(a, b)];
+
+    if (result) {
+      if (!discovered[result]) {
+        discovered[result] = true;
+        discoveryOrder.push(result);
+        save();
+        var wasGoal = goalSet[result];
+        renderCatalog(currentFilter());
+        renderCount();
+        renderGoals();
+        var base = a + " and " + b + " make " + result + ". You have found " +
+          discoveryOrder.length + " of " + TOTAL + " elements.";
+        if (wasGoal) {
+          var reached = GOALS.filter(function (g) { return discovered[g]; }).length;
+          announce("Goal achieved: " + result + "! " + base + " You've reached " +
+            reached + " of " + GOALS.length + " goals.");
+        } else {
+          announce("New discovery: " + result + "! " + base);
+        }
+      } else {
+        announce(a + " and " + b + " make " + result + ", but you've already discovered it.");
+      }
+    } else {
+      announce("Nothing happens. " + a + " and " + b + " don't combine.");
+    }
+
+    slot1 = null;
+    slot2 = null;
+    renderCauldron();
+  }
+
+  function hint() {
+    var actionableGoals = [];
+    var actionable = [];
+    var everything = [];
+    RECIPE_LIST.forEach(function (r) {
+      var result = r[2];
+      if (discovered[result]) { return; }
+      var bothKnown = discovered[r[0]] && discovered[r[1]];
+      if (bothKnown) {
+        if (goalSet[result]) { actionableGoals.push(r); }
+        else { actionable.push(r); }
+      } else {
+        everything.push(r);
+      }
+    });
+    var pool = actionableGoals.length ? actionableGoals :
+      (actionable.length ? actionable : everything);
+    if (pool.length === 0) {
+      announce("You've discovered every element!");
+      return;
+    }
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    var goalNote = goalSet[pick[2]] ? " (this leads to a goal)" : "";
+    announce("Hint: try combining " + pick[0] + " and " + pick[1] + "." + goalNote);
+  }
+
+  var filterValue = "";
+  function currentFilter() { return filterValue.trim().toLowerCase(); }
+
+  $("combine-btn").addEventListener("click", combine);
+  $("clear-btn").addEventListener("click", clearCauldron);
+  $("hint-btn").addEventListener("click", hint);
+
+  var resetArmed = false;
+  $("reset-btn").addEventListener("click", function () {
+    if (!resetArmed) {
+      resetArmed = true;
+      $("reset-btn").textContent = "Really reset? Click again to confirm";
+      announce("Press Reset again to confirm. This clears all discovered elements.");
+      window.setTimeout(function () {
+        if (resetArmed) {
+          resetArmed = false;
+          $("reset-btn").textContent = "Reset all progress";
+        }
+      }, 5000);
+      return;
+    }
+    resetArmed = false;
+    $("reset-btn").textContent = "Reset all progress";
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    discovered = {};
+    discoveryOrder = [];
+    BASE.forEach(function (el) {
+      discovered[el] = true;
+      discoveryOrder.push(el);
+    });
+    renderCatalog(currentFilter());
+    renderCount();
+    renderGoals();
+    announce("Progress reset. You're back to the four base elements.");
+  });
+
+  var search = $("search");
+  search.addEventListener("input", function () {
+    filterValue = search.value;
+    var shown = renderCatalog(currentFilter());
+    var total = discoveryOrder.length;
+    if (filterValue) {
+      $("search-live").textContent = shown + " of " + total + " elements shown.";
+    } else {
+      $("search-live").textContent = "";
+    }
+  });
+
+  renderCount();
+  renderGoals();
+  renderCatalog("");
+  announceCauldron("Cauldron empty.");
+})();
+</script>
+</body>
+</html>
