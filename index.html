@@ -138,11 +138,13 @@
       <li>Alt + H: Get a hint</li>
       <li>Alt + S: Search elements</li>
     </ul>
+    <p>If Alt alone doesn't work in your browser, hold Shift too (for example, Alt + Shift + C).</p>
   </section>
 
   <section aria-labelledby="options-heading">
     <h2 id="options-heading">Options</h2>
     <button id="flavor-btn">Flavor text: on</button>
+    <button id="sound-btn">Sound: off</button>
   </section>
 
   <section aria-labelledby="cauldron-heading">
@@ -388,11 +390,12 @@
   });
 
   var flavorOn = true;
+  var soundOn = false;
   var SAVE_KEY = "alembic-save-v1";
 
   function save() {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn, soundOn: soundOn }));
     } catch (e) { /* storage unavailable (private browsing, etc.) */ }
   }
 
@@ -414,6 +417,7 @@
       });
       discoveryOrder = BASE.concat(extras);
       if (data.flavorOn === false) { flavorOn = false; }
+      if (data.soundOn === true) { soundOn = true; }
     } catch (e) { /* corrupt save: ignore */ }
   }
   load();
@@ -422,6 +426,11 @@
   var slot2 = null;
 
   function $(id) { return document.getElementById(id); }
+
+  function syncOptions() {
+    $("flavor-btn").textContent = "Flavor text: " + (flavorOn ? "on" : "off");
+    $("sound-btn").textContent = "Sound: " + (soundOn ? "on" : "off");
+  }
 
   function announce(text) {
     var el = $("announce");
@@ -432,6 +441,48 @@
     var el = $("cauldron-live");
     el.textContent = "";
     window.setTimeout(function () { el.textContent = text; }, 30);
+  }
+
+  // --- Sound (Web Audio tones, no files; off by default) ---
+  var audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { audioCtx = new AC(); }
+    }
+    if (audioCtx && audioCtx.state === "suspended") { audioCtx.resume(); }
+    return audioCtx;
+  }
+  function tone(freq, when, dur, type, vol) {
+    var ctx = ensureAudio();
+    if (!ctx) { return; }
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    var t = ctx.currentTime + (when || 0);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol || 0.15, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.2));
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + (dur || 0.2) + 0.05);
+  }
+  function playDiscovery() {
+    tone(660, 0, 0.16, "sine", 0.12);
+    tone(880, 0.09, 0.22, "sine", 0.12);
+  }
+  function playGoal() {
+    tone(523.25, 0, 0.2, "triangle", 0.14);
+    tone(659.25, 0.11, 0.2, "triangle", 0.14);
+    tone(783.99, 0.22, 0.32, "triangle", 0.14);
+  }
+  function playNothing() {
+    tone(220, 0, 0.16, "sine", 0.08);
+  }
+  function playAlready() {
+    tone(440, 0, 0.09, "sine", 0.05);
   }
 
   function cauldronState() {
@@ -548,6 +599,7 @@
         var flavorText = (flavorOn && FLAVOR[result]) ? FLAVOR[result] : "";
         var flavorSep = flavorText ?
           ". " + flavorText.charAt(0).toUpperCase() + flavorText.slice(1) + " " : "! ";
+        if (soundOn) { if (wasGoal) { playGoal(); } else { playDiscovery(); } }
         if (wasGoal) {
           var reached = GOALS.filter(function (g) { return discovered[g]; }).length;
           announce("Goal achieved: " + result + flavorSep + base + " You've reached " +
@@ -557,9 +609,11 @@
         }
       } else {
         announce(a + " and " + b + " make " + result + ", but you've already discovered it.");
+        if (soundOn) { playAlready(); }
       }
     } else {
       announce("Nothing happens. " + a + " and " + b + " don't combine.");
+      if (soundOn) { playNothing(); }
     }
 
     slot1 = null;
@@ -618,6 +672,13 @@
     save();
     announce("Flavor text turned " + (flavorOn ? "on" : "off") + ".");
   });
+  $("sound-btn").addEventListener("click", function () {
+    soundOn = !soundOn;
+    $("sound-btn").textContent = "Sound: " + (soundOn ? "on" : "off");
+    save();
+    announce("Sound turned " + (soundOn ? "on" : "off") + ".");
+    if (soundOn) { playDiscovery(); }
+  });
 
   var resetArmed = false;
   $("reset-btn").addEventListener("click", function () {
@@ -660,6 +721,7 @@
     }
   });
 
+  syncOptions();
   renderCount();
   renderGoals();
   renderCatalog("");
