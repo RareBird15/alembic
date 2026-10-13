@@ -145,6 +145,7 @@
     <h2 id="options-heading">Options</h2>
     <button id="flavor-btn">Flavor text: on</button>
     <button id="sound-btn">Sound: off</button>
+    <button id="auto-btn">Auto-combine: off</button>
   </section>
 
   <section aria-labelledby="cauldron-heading">
@@ -391,11 +392,12 @@
 
   var flavorOn = true;
   var soundOn = false;
+  var autoCombine = false;
   var SAVE_KEY = "alembic-save-v1";
 
   function save() {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn, soundOn: soundOn }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn, soundOn: soundOn, autoCombine: autoCombine }));
     } catch (e) { /* storage unavailable (private browsing, etc.) */ }
   }
 
@@ -418,6 +420,7 @@
       discoveryOrder = BASE.concat(extras);
       if (data.flavorOn === false) { flavorOn = false; }
       if (data.soundOn === true) { soundOn = true; }
+      if (data.autoCombine === true) { autoCombine = true; }
     } catch (e) { /* corrupt save: ignore */ }
   }
   load();
@@ -430,6 +433,7 @@
   function syncOptions() {
     $("flavor-btn").textContent = "Flavor text: " + (flavorOn ? "on" : "off");
     $("sound-btn").textContent = "Sound: " + (soundOn ? "on" : "off");
+    $("auto-btn").textContent = "Auto-combine: " + (autoCombine ? "on" : "off");
   }
 
   function announce(text) {
@@ -566,8 +570,12 @@
       announceCauldron(name + " added to the cauldron. " + cauldronState());
     } else if (!slot2) {
       slot2 = name;
-      renderCauldron();
-      announceCauldron(name + " added to the cauldron. " + cauldronState());
+      if (autoCombine) {
+        combine();
+      } else {
+        renderCauldron();
+        announceCauldron(name + " added to the cauldron. " + cauldronState());
+      }
     } else {
       announce("The cauldron is full. Choose Combine, or Clear first.");
     }
@@ -678,6 +686,12 @@
     save();
     announce("Sound turned " + (soundOn ? "on" : "off") + ".");
     if (soundOn) { playDiscovery(); }
+  });
+  $("auto-btn").addEventListener("click", function () {
+    autoCombine = !autoCombine;
+    $("auto-btn").textContent = "Auto-combine: " + (autoCombine ? "on" : "off");
+    save();
+    announce("Auto-combine turned " + (autoCombine ? "on" : "off") + ".");
   });
 
   var resetArmed = false;
