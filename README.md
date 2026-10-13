@@ -33,6 +33,8 @@ You can also open `index.html` directly in any browser.
   second element, skipping the separate Combine press.
 - **Simple sounds.** Soft tones for discoveries and goals, and a quiet note
   when nothing happens. Off by default; turn them on in Options.
+- **Recipe notebook.** Every discovered element shows what you combined to make
+  it, and a collapsible discovery log lists your finds in order.
 - **Automatic save.** Progress persists in your browser and restores on reload.
 - **Reset with a safety check.** Wiping progress needs two confirming clicks.
 
@@ -47,7 +49,8 @@ You can also open `index.html` directly in any browser.
 ## Status
 
 Alpha. The core game is complete — 82 elements, 20 milestone goals, automatic
-saving, and flavor text. Themed worlds and optional sound are planned.
+saving, flavor text, sounds, keyboard shortcuts, and a recipe notebook. Themed
+worlds and more elements are planned.
 
 ## License
 

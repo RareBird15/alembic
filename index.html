@@ -100,6 +100,7 @@
   }
   ul#elements li { margin: 0; display: flex; flex-direction: column; align-items: flex-start; }
   .flavor { color: var(--muted); font-size: .85rem; margin-top: .15rem; }
+  .recipe { color: var(--muted); font-size: .8rem; margin-top: .1rem; }
   .goal-list { list-style: none; padding: 0; }
   .goal-list li { padding: .15rem 0; }
   .goal-list .reached { color: var(--good); }
@@ -165,6 +166,14 @@
     <input id="search" type="text" placeholder="Search elements" autocomplete="off">
     <div id="search-live" role="status" aria-live="polite" class="sr-only"></div>
     <ul id="elements" role="list"></ul>
+  </section>
+
+  <section aria-labelledby="log-heading">
+    <h2 id="log-heading">Discovery log</h2>
+    <details id="log-details">
+      <summary>Show your discoveries in order</summary>
+      <ol id="discovery-log" role="list"></ol>
+    </details>
   </section>
 
   <section aria-labelledby="goals-heading">
@@ -380,6 +389,11 @@
   });
   var TOTAL = BASE.length + Object.keys(allResults).length;
 
+  var RECIPE_BY_RESULT = {};
+  RECIPE_LIST.forEach(function (r) {
+    RECIPE_BY_RESULT[r[2]] = [r[0], r[1]];
+  });
+
   var goalSet = {};
   GOALS.forEach(function (g) { goalSet[g] = true; });
 
@@ -558,9 +572,25 @@
         f.textContent = FLAVOR[name];
         li.appendChild(f);
       }
+      var recipe = RECIPE_BY_RESULT[name];
+      var rec = document.createElement("span");
+      rec.className = "recipe";
+      rec.textContent = recipe ? recipe[0] + " + " + recipe[1] : "Starting element";
+      li.appendChild(rec);
       list.appendChild(li);
     });
     return shown;
+  }
+
+  function renderDiscoveryLog() {
+    var ol = $("discovery-log");
+    ol.innerHTML = "";
+    discoveryOrder.forEach(function (name) {
+      var li = document.createElement("li");
+      var recipe = RECIPE_BY_RESULT[name];
+      li.textContent = name + (recipe ? " (" + recipe[0] + " + " + recipe[1] + ")" : " (starting element)");
+      ol.appendChild(li);
+    });
   }
 
   function addToCauldron(name) {
@@ -602,6 +632,7 @@
         renderCatalog(currentFilter());
         renderCount();
         renderGoals();
+        renderDiscoveryLog();
         var base = a + " and " + b + " make " + result + ". You have found " +
           discoveryOrder.length + " of " + TOTAL + " elements.";
         var flavorText = (flavorOn && FLAVOR[result]) ? FLAVOR[result] : "";
@@ -720,6 +751,7 @@
     renderCatalog(currentFilter());
     renderCount();
     renderGoals();
+    renderDiscoveryLog();
     announce("Progress reset. You're back to the four base elements.");
   });
 
@@ -739,6 +771,7 @@
   renderCount();
   renderGoals();
   renderCatalog("");
+  renderDiscoveryLog();
   announceCauldron("Cauldron empty.");
 })();
 </script>
