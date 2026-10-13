@@ -29,6 +29,8 @@ You can also open `index.html` directly in any browser.
   moment you discover it. Toggle it on or off in Options.
 - **Keyboard shortcuts.** Alt + C to combine, Alt + X to clear, Alt + H for a
   hint, Alt + S to search. These work even in a screen reader's browse mode.
+- **Auto-combine.** Turn it on in Options to combine the moment you add a
+  second element, skipping the separate Combine press.
 - **Simple sounds.** Soft tones for discoveries and goals, and a quiet note
   when nothing happens. Off by default; turn them on in Options.
 - **Automatic save.** Progress persists in your browser and restores on reload.
