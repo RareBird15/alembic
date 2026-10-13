@@ -128,7 +128,7 @@
 
   <section aria-labelledby="how-heading">
     <h2 id="how-heading">How to play</h2>
-    <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 82 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
+    <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 132 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
   </section>
 
   <section aria-labelledby="shortcuts-heading">
@@ -281,14 +281,65 @@
     ["Egg","Fire","Omelette"],
     ["Human","Book","Knowledge"],
     ["Beach","Sun","Holiday"],
-    ["Robot","Human","Cyborg"]
+    ["Robot","Human","Cyborg"],
+    ["Air","Energy","Wind"],
+    ["Cloud","Mountain","Snow"],
+    ["Water","Snow","Ice"],
+    ["Ice","Mountain","Glacier"],
+    ["Ocean","Ice","Iceberg"],
+    ["Cloud","Electricity","Lightning"],
+    ["Sky","Stone","Moon"],
+    ["Sky","Sky","Star"],
+    ["Star","Earth","Planet"],
+    ["Glass","Star","Telescope"],
+    ["Airplane","Fire","Rocket"],
+    ["Mountain","Earth","Cave"],
+    ["Tree","Earth","Coal"],
+    ["Coal","Fire","Diamond"],
+    ["Metal","Sun","Gold"],
+    ["Metal","Moon","Silver"],
+    ["Metal","Stone","Iron"],
+    ["Ocean","Sun","Salt"],
+    ["Waterfall","Earth","River"],
+    ["Ocean","Mountain","Island"],
+    ["Ocean","Stone","Coral"],
+    ["Ocean","Animal","Shark"],
+    ["Ocean","Moon","Tide"],
+    ["Sand","Sun","Desert"],
+    ["Desert","Water","Oasis"],
+    ["Desert","Animal","Camel"],
+    ["Desert","Stone","Pyramid"],
+    ["Flower","Plant","Seed"],
+    ["Seed","Earth","Grass"],
+    ["Flower","Tree","Fruit"],
+    ["Field","Sun","Pumpkin"],
+    ["Field","Water","Rice"],
+    ["Bee","Flower","Honey"],
+    ["Wheat","Water","Beer"],
+    ["Life","Dust","Insect"],
+    ["Insect","Flower","Bee"],
+    ["Animal","Grass","Cow"],
+    ["Cow","Farmer","Milk"],
+    ["Milk","Salt","Cheese"],
+    ["Animal","Mud","Pig"],
+    ["Animal","Cloud","Sheep"],
+    ["Animal","Moon","Wolf"],
+    ["Egg","Stone","Dinosaur"],
+    ["House","House","Village"],
+    ["Village","Village","City"],
+    ["Castle","Stone","Tower"],
+    ["Wood","River","Bridge"],
+    ["Stone","Wheel","Road"],
+    ["Plant","Knowledge","Medicine"],
+    ["Human","Air","Music"]
   ];
 
   // Milestone elements to chase.
   var GOALS = [
     "Life","Human","House","Car","Boat","Airplane","Computer","Robot",
     "Castle","Phoenix","Whale","Rainbow","Ocean","Forest","Bread",
-    "Lightbulb","Machine","Steel","Knowledge","Cyborg"
+    "Lightbulb","Machine","Steel","Knowledge","Cyborg",
+    "Rocket","Diamond","Pyramid","City","Medicine","Music"
   ];
 
   // Flavor text: one line per element. Goals get a longer, two-clause line.
@@ -374,7 +425,57 @@
     "Omelette": "an egg that became a meal.",
     "Knowledge": "the things we pass down. What survives us, carried in other hands.",
     "Holiday": "a day that forgot its to-do list.",
-    "Cyborg": "a person and a machine, learning each other. Neither sure where one ends and the other begins."
+    "Cyborg": "a person and a machine, learning each other. Neither sure where one ends and the other begins.",
+    "Wind": "the air, learning to move.",
+    "Snow": "the cloud, falling quiet.",
+    "Ice": "water, holding still.",
+    "Glacier": "ice that forgot how to melt.",
+    "Iceberg": "ice that learned to float.",
+    "Lightning": "the storm, saying it out loud.",
+    "Moon": "a stone that learned to glow.",
+    "Star": "a sun, seen from far away.",
+    "Planet": "a star, cooled into a home.",
+    "Telescope": "glass that reaches across the dark.",
+    "Rocket": "fire, pointed at the sky. It did not fall back down.",
+    "Cave": "the mountain, opening up.",
+    "Coal": "a forest, buried and waiting.",
+    "Diamond": "coal that survived the fire. What the earth cannot break, it makes precious.",
+    "Gold": "metal that shines like the sun.",
+    "Silver": "metal that remembers the moon.",
+    "Iron": "metal, before it learned a job.",
+    "Salt": "the ocean, left behind.",
+    "River": "water that found its way down.",
+    "Island": "the mountain, standing in the sea.",
+    "Coral": "stone that the ocean grew.",
+    "Shark": "the ocean's sharpest question.",
+    "Tide": "the ocean, answering the moon.",
+    "Desert": "sand, dried out and endless.",
+    "Oasis": "water that refused to leave.",
+    "Camel": "an animal built for the long road.",
+    "Pyramid": "stone that learned to last. It waits for everyone who built it.",
+    "Seed": "tomorrow, folded up small.",
+    "Grass": "the ground, growing a green coat.",
+    "Fruit": "a flower, keeping its promise.",
+    "Pumpkin": "a plant that swallowed the sun.",
+    "Rice": "a field, standing in water.",
+    "Honey": "flowers, saved for later.",
+    "Beer": "wheat that learned to celebrate.",
+    "Insect": "life, made small enough to ignore.",
+    "Bee": "an insect with a job.",
+    "Cow": "an animal that learned to give.",
+    "Milk": "a cow's quiet answer.",
+    "Cheese": "milk, growing old on purpose.",
+    "Pig": "an animal that loves the mud.",
+    "Sheep": "a cloud that learned to eat grass.",
+    "Wolf": "an animal that answers the moon.",
+    "Dinosaur": "an egg that grew too big.",
+    "Village": "houses, learning to be neighbors.",
+    "City": "villages that grew together. A place where the streets remember every footstep.",
+    "Tower": "stone, reaching upward.",
+    "Bridge": "wood that learned to cross.",
+    "Road": "stone that learned to carry us.",
+    "Medicine": "plants that learned to heal. The first gentle answer to pain.",
+    "Music": "the air, shaped into feeling. It carries what words cannot hold."
   };
 
   function key(a, b) {

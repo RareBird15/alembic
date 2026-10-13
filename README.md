@@ -1,8 +1,8 @@
 # Alembic
 
 A screen-reader-first text alchemy game. Start with four elements — Fire,
-Water, Earth, and Air — and combine them two at a time to discover 82 elements,
-chasing 20 milestone goals. No drag-and-drop, no timers, no fail states. Just
+Water, Earth, and Air — and combine them two at a time to discover 132 elements,
+chasing 26 milestone goals. No drag-and-drop, no timers, no fail states. Just
 buttons, a cauldron, and the satisfying "aha" of a new discovery.
 
 ## Play
@@ -48,7 +48,7 @@ You can also open `index.html` directly in any browser.
 
 ## Status
 
-Alpha. The core game is complete — 82 elements, 20 milestone goals, automatic
+Alpha. The core game is complete — 132 elements, 26 milestone goals, automatic
 saving, flavor text, sounds, keyboard shortcuts, and a recipe notebook. Themed
 worlds and more elements are planned.
 
