@@ -27,6 +27,8 @@ You can also open `index.html` directly in any browser.
   the result — so the discovery still feels earned.
 - **Flavor text.** Every element has a short line of flavor, read aloud the
   moment you discover it. Toggle it on or off in Options.
+- **Keyboard shortcuts.** Alt + C to combine, Alt + X to clear, Alt + H for a
+  hint, Alt + S to search. These work even in a screen reader's browse mode.
 - **Automatic save.** Progress persists in your browser and restores on reload.
 - **Reset with a safety check.** Wiping progress needs two confirming clicks.
 
