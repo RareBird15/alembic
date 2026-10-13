@@ -128,7 +128,7 @@
 
   <section aria-labelledby="how-heading">
     <h2 id="how-heading">How to play</h2>
-    <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 132 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
+    <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. After you combine, your first element stays in the cauldron so you can try it with something new (you can change this in Options). New discoveries get added to your catalog. There are 132 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
   </section>
 
   <section aria-labelledby="shortcuts-heading">
@@ -147,6 +147,7 @@
     <button id="flavor-btn">Flavor text: on</button>
     <button id="sound-btn">Sound: off</button>
     <button id="auto-btn">Auto-combine: off</button>
+    <button id="cauldron-btn">Cauldron: keep first</button>
   </section>
 
   <section aria-labelledby="cauldron-heading">
@@ -508,11 +509,12 @@
   var flavorOn = true;
   var soundOn = false;
   var autoCombine = false;
+  var keepMode = "first";
   var SAVE_KEY = "alembic-save-v1";
 
   function save() {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn, soundOn: soundOn, autoCombine: autoCombine }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ discoveryOrder: discoveryOrder, flavorOn: flavorOn, soundOn: soundOn, autoCombine: autoCombine, keepMode: keepMode }));
     } catch (e) { /* storage unavailable (private browsing, etc.) */ }
   }
 
@@ -536,6 +538,7 @@
       if (data.flavorOn === false) { flavorOn = false; }
       if (data.soundOn === true) { soundOn = true; }
       if (data.autoCombine === true) { autoCombine = true; }
+      if (data.keepMode === "last" || data.keepMode === "clear") { keepMode = data.keepMode; }
     } catch (e) { /* corrupt save: ignore */ }
   }
   load();
@@ -545,10 +548,14 @@
 
   function $(id) { return document.getElementById(id); }
 
+  function keepModeLabel() {
+    return keepMode === "first" ? "keep first" : (keepMode === "last" ? "keep last" : "clear both");
+  }
   function syncOptions() {
     $("flavor-btn").textContent = "Flavor text: " + (flavorOn ? "on" : "off");
     $("sound-btn").textContent = "Sound: " + (soundOn ? "on" : "off");
     $("auto-btn").textContent = "Auto-combine: " + (autoCombine ? "on" : "off");
+    $("cauldron-btn").textContent = "Cauldron: " + keepModeLabel();
   }
 
   function announce(text) {
@@ -752,9 +759,19 @@
       if (soundOn) { playNothing(); }
     }
 
-    slot1 = null;
-    slot2 = null;
+    if (keepMode === "first") {
+      slot2 = null;
+    } else if (keepMode === "last") {
+      slot1 = slot2;
+      slot2 = null;
+    } else {
+      slot1 = null;
+      slot2 = null;
+    }
     renderCauldron();
+    if (keepMode !== "clear") {
+      announceCauldron(slot1 + " stays in the cauldron.");
+    }
   }
 
   function hint() {
@@ -820,6 +837,12 @@
     $("auto-btn").textContent = "Auto-combine: " + (autoCombine ? "on" : "off");
     save();
     announce("Auto-combine turned " + (autoCombine ? "on" : "off") + ".");
+  });
+  $("cauldron-btn").addEventListener("click", function () {
+    keepMode = keepMode === "first" ? "last" : (keepMode === "last" ? "clear" : "first");
+    syncOptions();
+    save();
+    announce("Cauldron now set to " + keepModeLabel() + ".");
   });
 
   var resetArmed = false;

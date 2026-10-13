@@ -31,6 +31,9 @@ You can also open `index.html` directly in any browser.
   hint, Alt + S to search. These work even in a screen reader's browse mode.
 - **Auto-combine.** Turn it on in Options to combine the moment you add a
   second element, skipping the separate Combine press.
+- **Keep an element in the cauldron.** After each combine, you can keep the
+  first or last element (or clear both) so you're not re-adding elements every
+  time. Set in Options; defaults to keeping the first.
 - **Simple sounds.** Soft tones for discoveries and goals, and a quiet note
   when nothing happens. Off by default; turn them on in Options.
 - **Recipe notebook.** Every discovered element shows what you combined to make
