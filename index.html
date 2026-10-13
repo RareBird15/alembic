@@ -566,17 +566,14 @@
       btn.setAttribute("aria-label", "Add " + name + " to cauldron");
       btn.addEventListener("click", function () { addToCauldron(name); });
       li.appendChild(btn);
-      if (flavorOn && FLAVOR[name]) {
-        var f = document.createElement("span");
-        f.className = "flavor";
-        f.textContent = FLAVOR[name];
-        li.appendChild(f);
-      }
+      var sub = [];
+      if (flavorOn && FLAVOR[name]) { sub.push(FLAVOR[name]); }
       var recipe = RECIPE_BY_RESULT[name];
-      var rec = document.createElement("span");
-      rec.className = "recipe";
-      rec.textContent = " " + (recipe ? recipe[0] + " + " + recipe[1] : "Starting element");
-      li.appendChild(rec);
+      sub.push(recipe ? recipe[0] + " + " + recipe[1] : "Starting element");
+      var subEl = document.createElement("span");
+      subEl.className = "flavor";
+      subEl.textContent = sub.join(" ");
+      li.appendChild(subEl);
       list.appendChild(li);
     });
     return shown;
