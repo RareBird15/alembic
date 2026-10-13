@@ -575,7 +575,7 @@
       var recipe = RECIPE_BY_RESULT[name];
       var rec = document.createElement("span");
       rec.className = "recipe";
-      rec.textContent = recipe ? recipe[0] + " + " + recipe[1] : "Starting element";
+      rec.textContent = " " + (recipe ? recipe[0] + " + " + recipe[1] : "Starting element");
       li.appendChild(rec);
       list.appendChild(li);
     });
