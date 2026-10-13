@@ -130,6 +130,16 @@
     <p>You start with four elements: Fire, Water, Earth, and Air. Activate an element to add it to your cauldron, add a second, then choose "Combine" to see what they make. New discoveries get added to your catalog. There are 82 elements in all. The <strong>Goals</strong> section lists the big discoveries to chase, and "Get a hint" steers you toward the next one without spoiling it.</p>
   </section>
 
+  <section aria-labelledby="shortcuts-heading">
+    <h2 id="shortcuts-heading">Keyboard shortcuts</h2>
+    <ul>
+      <li>Alt + C: Combine</li>
+      <li>Alt + X: Clear cauldron</li>
+      <li>Alt + H: Get a hint</li>
+      <li>Alt + S: Search elements</li>
+    </ul>
+  </section>
+
   <section aria-labelledby="options-heading">
     <h2 id="options-heading">Options</h2>
     <button id="flavor-btn">Flavor text: on</button>
@@ -589,6 +599,18 @@
   $("combine-btn").addEventListener("click", combine);
   $("clear-btn").addEventListener("click", clearCauldron);
   $("hint-btn").addEventListener("click", hint);
+
+  // Keyboard shortcuts: Alt + letter works in screen-reader browse mode too.
+  document.addEventListener("keydown", function (e) {
+    if (!e.altKey || e.ctrlKey || e.metaKey) { return; }
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") { return; }
+    var k = (e.key || "").toLowerCase();
+    if (k === "c") { e.preventDefault(); combine(); }
+    else if (k === "x") { e.preventDefault(); clearCauldron(); }
+    else if (k === "h") { e.preventDefault(); hint(); }
+    else if (k === "s") { e.preventDefault(); $("search").focus(); }
+  });
   $("flavor-btn").addEventListener("click", function () {
     flavorOn = !flavorOn;
     $("flavor-btn").textContent = "Flavor text: " + (flavorOn ? "on" : "off");
